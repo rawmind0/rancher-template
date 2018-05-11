@@ -2,26 +2,27 @@ package main
 
 import (
 	"flag"
-	"path/filepath"
 	"os"
+	"path/filepath"
 	"strconv"
+
 	log "github.com/Sirupsen/logrus"
 )
 
 func check(e error, m string) {
-    if e != nil {
-		log.Error("[Error]: ", m , e)
+	if e != nil {
+		log.Error("[Error]: ", m, e)
 	}
 }
 
 type Params struct {
-	Url string
-	Prefix string
+	Url     string
+	Prefix  string
 	Logfile string
-	Files []string
+	Files   []string
 	Refresh int
-	Self bool
-	Debug bool
+	Self    bool
+	Debug   bool
 }
 
 func (p *Params) init() {
@@ -48,36 +49,44 @@ func (p *Params) setEnvVar(file_path *string) {
 	var aux_bool bool
 
 	url := os.Getenv("RANCHER_TEMPLATE_URL")
-	if len(url) > 0 { p.Url = url }
+	if len(url) > 0 {
+		p.Url = url
+	}
 
 	prefix := os.Getenv("RANCHER_TEMPLATE_PREFIX")
-	if len(prefix) > 0 { p.Prefix = prefix }
+	if len(prefix) > 0 {
+		p.Prefix = prefix
+	}
 
 	logfile := os.Getenv("RANCHER_TEMPLATE_LOGFILE")
-	if len(logfile) > 0 { p.Logfile = logfile }
+	if len(logfile) > 0 {
+		p.Logfile = logfile
+	}
 
 	files := os.Getenv("RANCHER_TEMPLATE_FILES")
-	if len(files) > 0 { *file_path = files }
+	if len(files) > 0 {
+		*file_path = files
+	}
 
 	refresh := os.Getenv("RANCHER_TEMPLATE_REFRESH")
-	if len(refresh) > 0 { 
-		aux_int, err = strconv.Atoi(refresh) 
+	if len(refresh) > 0 {
+		aux_int, err = strconv.Atoi(refresh)
 		if err == nil {
 			p.Refresh = aux_int
 		}
 	}
 
 	self := os.Getenv("RANCHER_TEMPLATE_SELF")
-	if len(self) > 0 { 
-		aux_bool, err = strconv.ParseBool(self) 
+	if len(self) > 0 {
+		aux_bool, err = strconv.ParseBool(self)
 		if err == nil {
 			p.Self = aux_bool
 		}
 	}
 
 	debug := os.Getenv("RANCHER_TEMPLATE_DEBUG")
-	if len(debug) > 0 { 
-		aux_bool, err = strconv.ParseBool(debug) 
+	if len(debug) > 0 {
+		aux_bool, err = strconv.ParseBool(debug)
 		if err == nil {
 			p.Debug = aux_bool
 		}
@@ -87,16 +96,16 @@ func (p *Params) setEnvVar(file_path *string) {
 func (p *Params) getFiles(f string) {
 	var err error
 
-	p.Files , err = filepath.Glob(f)
+	p.Files, err = filepath.Glob(f)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
 func getenv(key, fallback string) string {
-    value := os.Getenv(key)
-    if len(value) == 0 {
-        return fallback
-    }
-    return value
+	value := os.Getenv(key)
+	if len(value) == 0 {
+		return fallback
+	}
+	return value
 }
