@@ -49,12 +49,19 @@ Usage of rancher-template:
 
 Added some custom functions to golang templates
 
-- "split" `func split(s, sep string) []string`
-- "replace" `func replace(s, old, new string) []string`
-- "tolower" `func(s string) string`
+- "split": `func split(s, sep string) []string`
+- "replace": `func replace(s, old, new string) []string`
+- "tolower": `func(s string) string`
 - "contains": `func (s, c string) bool`
 - "ishealthy" `func (s string) bool`
 - "isrunning": `func (s string) bool`
+- "getStringValue": get string value associated to a label. `func (labels map[string]string, labelName string, defaultValue string) string`
+- "getBoolValue": get bool value associated to a label. `func (labels map[string]string, labelName string, defaultValue bool) bool`
+- "getIntValue": get int value associated to a label. `func (labels map[string]string, labelName string, defaultValue int) int`
+- "getInt64Value": get int64 value associated to a label. `func (labels map[string]string, labelName string, defaultValue int64) int64`
+- "getSliceStringValue": get a slice of string associated to a label. `func (labels map[string]string, labelName string) []string`
+- "hasLabel": Check if a value is associated to a label. `func (labels map[string]string, labelName string) bool`
+- "hasLabelPrefix": Check if a value is associated to a less one label with a prefix. `func (labels map[string]string, prefix string) bool`
 
 
 ## Templates 

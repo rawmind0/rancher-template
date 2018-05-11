@@ -101,6 +101,13 @@ func (r *rancherTemplate) getTemplateFunc() template.FuncMap {
 		"isrunning": func(s string) bool {
 			return strings.Contains(s, "running")
 		},
+		"getStringValue":      getStringValue,
+		"getBoolValue":        getBoolValue,
+		"getIntValue":         getIntValue,
+		"getInt64Value":       getInt64Value,
+		"getSliceStringValue": getSliceStringValue,
+		"hasLabel":            has,
+		"hasLabelPrefix":      hasPrefix,
 	}
 }
 
