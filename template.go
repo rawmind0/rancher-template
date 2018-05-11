@@ -1,24 +1,25 @@
 package main
 
 import (
+	"bytes"
+	"crypto/sha256"
 	"fmt"
 	"io/ioutil"
-	"gopkg.in/yaml.v2"
-	"crypto/sha256"
-	"strings"
 	"os/exec"
-	"text/template"
 	"path/filepath"
-	"bytes"
+	"strings"
+	"text/template"
+
 	log "github.com/Sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 )
 
 type rancherTemplate struct {
-	Name 			string 	 `description:"Template name"`
-	Hash 			string 	 `description:"Template data hash"`
-	Destination  	string 	 `description:"Template destination file" yaml:"destination,omitempty"`
-	Source 	   	 	string   `description:"Template source file" yaml:"source,omitempty"`
-	Action		 	string	 `description:"Template action if change" yaml:"action,omitempty"`
+	Name        string `description:"Template name"`
+	Hash        string `description:"Template data hash"`
+	Destination string `description:"Template destination file" yaml:"destination,omitempty"`
+	Source      string `description:"Template source file" yaml:"source,omitempty"`
+	Action      string `description:"Template action if change" yaml:"action,omitempty"`
 }
 
 func (r *rancherTemplate) getConfig(file string) error {
@@ -41,20 +42,20 @@ func (r *rancherTemplate) getConfig(file string) error {
 }
 
 func (r *rancherTemplate) getDestinationHash() string {
-  	content, err := ioutil.ReadFile(r.Destination)
+	content, err := ioutil.ReadFile(r.Destination)
 	if err != nil {
 		return ""
-	} 
+	}
 
-  	return fmt.Sprintf("%x", sha256.Sum256(content))
+	return fmt.Sprintf("%x", sha256.Sum256(content))
 }
 
 func (r *rancherTemplate) getDataHash(w []byte) string {
-  	return fmt.Sprintf("%x", sha256.Sum256(w))
+	return fmt.Sprintf("%x", sha256.Sum256(w))
 }
 
 func (r *rancherTemplate) getHash() string {
-  	return r.Hash
+	return r.Hash
 }
 
 func (r *rancherTemplate) updateHash(h string) bool {
@@ -66,12 +67,8 @@ func (r *rancherTemplate) updateHash(h string) bool {
 	return false
 }
 
-func (r *rancherTemplate) hasChanged(h string) (bool) {
-	if h != r.Hash {
-  		return true
-  	}
-
-  	return false
+func (r *rancherTemplate) hasChanged(h string) bool {
+	return h != r.Hash
 }
 
 func (r *rancherTemplate) doAction() {
@@ -79,31 +76,38 @@ func (r *rancherTemplate) doAction() {
 		log.WithField("action", r.Action).Info("Executing Action.")
 		err := exec.Command("sh", "-c", r.Action).Run()
 		if err != nil {
-	        log.WithFields(log.Fields{"action": r.Action, "error": err}).Error("Failed executing action.")
-	    }
+			log.WithFields(log.Fields{"action": r.Action, "error": err}).Error("Failed executing action.")
+		}
 	}
 }
 
-func (r *rancherTemplate) getTemplateFunc() template.FuncMap{
+func (r *rancherTemplate) getTemplateFunc() template.FuncMap {
 	return template.FuncMap{
-		"split": func (s, sep string) []string {
+		"split": func(s, sep string) []string {
 			return strings.Split(s, sep)
 		},
-		"replace": func (s, old, new string) string {
-			return strings.Replace(s, old, new , -1)
+		"replace": func(s, old, new string) string {
+			return strings.Replace(s, old, new, -1)
 		},
-		"tolower": func (s string) string {
+		"tolower": func(s string) string {
 			return strings.ToLower(s)
 		},
-		"contains": func (s, c string) bool {
+		"contains": func(s, c string) bool {
 			return strings.Contains(s, c)
 		},
-		"ishealthy": func (s string) bool {
+		"ishealthy": func(s string) bool {
 			return strings.Contains(s, "healthy")
 		},
-		"isrunning": func (s string) bool {
+		"isrunning": func(s string) bool {
 			return strings.Contains(s, "running")
 		},
+		"getStringValue":      getStringValue,
+		"getBoolValue":        getBoolValue,
+		"getIntValue":         getIntValue,
+		"getInt64Value":       getInt64Value,
+		"getSliceStringValue": getSliceStringValue,
+		"hasLabel":            has,
+		"hasLabelPrefix":      hasPrefix,
 	}
 }
 
@@ -116,16 +120,16 @@ func (r *rancherTemplate) execute(data interface{}) {
 		return
 	}
 
-	var dest_buf bytes.Buffer
-	err = t.Execute(&dest_buf, data)
+	var destBuf bytes.Buffer
+	err = t.Execute(&destBuf, data)
 	if err != nil {
 		log.WithFields(log.Fields{"file": r.Source, "error": err}).Error("Failed executing template.")
 		return
 	}
 
-	dest_bytes := dest_buf.Bytes()
-	if r.updateHash(r.getDataHash(dest_bytes)) {
-		err := ioutil.WriteFile(r.Destination, dest_bytes, 0644)
+	destBytes := destBuf.Bytes()
+	if r.updateHash(r.getDataHash(destBytes)) {
+		err := ioutil.WriteFile(r.Destination, destBytes, 0644)
 		if err != nil {
 			log.WithFields(log.Fields{"file": r.Destination, "error": err}).Error("Failed writing file.")
 			return
@@ -138,10 +142,10 @@ func (r *rancherTemplate) execute(data interface{}) {
 }
 
 type rancherTemplates struct {
-	rancherTemplates 	[]*rancherTemplate
+	rancherTemplates []*rancherTemplate
 }
 
-func newRancherTemplates(files []string) *rancherTemplates{
+func newRancherTemplates(files []string) *rancherTemplates {
 	var temp = &rancherTemplates{}
 
 	err := temp.getConfig(files)
@@ -154,9 +158,9 @@ func newRancherTemplates(files []string) *rancherTemplates{
 }
 
 func (r *rancherTemplates) execute(data interface{}) {
-	for _ , tmpl := range r.rancherTemplates {
-        tmpl.execute(data)
-    }
+	for _, tmpl := range r.rancherTemplates {
+		tmpl.execute(data)
+	}
 }
 
 func (r *rancherTemplates) getConfig(files []string) error {
@@ -170,8 +174,8 @@ func (r *rancherTemplates) getConfig(files []string) error {
 		}
 	}
 
-	if len(files) ==0 { 
-		log.Fatal("No template config file found.") 
+	if len(files) == 0 {
+		log.Fatal("No template config file found.")
 	}
 
 	return err
