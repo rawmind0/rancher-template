@@ -26,27 +26,27 @@ type Params struct {
 }
 
 func (p *Params) init() {
-	var file_path string
+	var filePath string
 
 	flag.StringVar(&p.Url, "url", "http://rancher-metadata.rancher.internal", "Rancher metadata url. RANCHER_TEMPLATE_URL")
 	flag.StringVar(&p.Prefix, "prefix", "2016-07-29", "Rancher metadata prefix. RANCHER_TEMPLATE_PREFIX")
 	flag.StringVar(&p.Logfile, "logfile", "/opt/tools/rancher-template/log/rancher-template.log", "Rancher template log fie. RANCHER_TEMPLATE_LOGFILE")
-	flag.StringVar(&file_path, "templates", "/opt/tools/rancher-template/etc/*.yml", "Templates config files, wildcard allowed between quotes. RANCHER_TEMPLATE_FILES")
+	flag.StringVar(&filePath, "templates", "/opt/tools/rancher-template/etc/*.yml", "Templates config files, wildcard allowed between quotes. RANCHER_TEMPLATE_FILES")
 	flag.IntVar(&p.Refresh, "refresh", 300, "Rancher metadata refresh time in seconds. RANCHER_TEMPLATE_REFRESH")
 	flag.BoolVar(&p.Self, "self", false, "Get self stack data or all. RANCHER_TEMPLATE_SELF")
 	flag.BoolVar(&p.Debug, "debug", false, "Run in debug mode. RANCHER_TEMPLATE_DEBUG")
 
 	flag.Parse()
 
-	p.setEnvVar(&file_path)
+	p.setEnvVar(&filePath)
 
-	p.getFiles(file_path)
+	p.getFiles(filePath)
 }
 
-func (p *Params) setEnvVar(file_path *string) {
+func (p *Params) setEnvVar(filePath *string) {
 	var err error
-	var aux_int int
-	var aux_bool bool
+	var auxInt int
+	var auxBool bool
 
 	url := os.Getenv("RANCHER_TEMPLATE_URL")
 	if len(url) > 0 {
@@ -65,30 +65,30 @@ func (p *Params) setEnvVar(file_path *string) {
 
 	files := os.Getenv("RANCHER_TEMPLATE_FILES")
 	if len(files) > 0 {
-		*file_path = files
+		*filePath = files
 	}
 
 	refresh := os.Getenv("RANCHER_TEMPLATE_REFRESH")
 	if len(refresh) > 0 {
-		aux_int, err = strconv.Atoi(refresh)
+		auxInt, err = strconv.Atoi(refresh)
 		if err == nil {
-			p.Refresh = aux_int
+			p.Refresh = auxInt
 		}
 	}
 
 	self := os.Getenv("RANCHER_TEMPLATE_SELF")
 	if len(self) > 0 {
-		aux_bool, err = strconv.ParseBool(self)
+		auxBool, err = strconv.ParseBool(self)
 		if err == nil {
-			p.Self = aux_bool
+			p.Self = auxBool
 		}
 	}
 
 	debug := os.Getenv("RANCHER_TEMPLATE_DEBUG")
 	if len(debug) > 0 {
-		aux_bool, err = strconv.ParseBool(debug)
+		auxBool, err = strconv.ParseBool(debug)
 		if err == nil {
-			p.Debug = aux_bool
+			p.Debug = auxBool
 		}
 	}
 }

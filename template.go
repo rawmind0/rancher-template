@@ -68,11 +68,7 @@ func (r *rancherTemplate) updateHash(h string) bool {
 }
 
 func (r *rancherTemplate) hasChanged(h string) bool {
-	if h != r.Hash {
-		return true
-	}
-
-	return false
+	return h != r.Hash
 }
 
 func (r *rancherTemplate) doAction() {
@@ -117,16 +113,16 @@ func (r *rancherTemplate) execute(data interface{}) {
 		return
 	}
 
-	var dest_buf bytes.Buffer
-	err = t.Execute(&dest_buf, data)
+	var destBuf bytes.Buffer
+	err = t.Execute(&destBuf, data)
 	if err != nil {
 		log.WithFields(log.Fields{"file": r.Source, "error": err}).Error("Failed executing template.")
 		return
 	}
 
-	dest_bytes := dest_buf.Bytes()
-	if r.updateHash(r.getDataHash(dest_bytes)) {
-		err := ioutil.WriteFile(r.Destination, dest_bytes, 0644)
+	destBytes := destBuf.Bytes()
+	if r.updateHash(r.getDataHash(destBytes)) {
+		err := ioutil.WriteFile(r.Destination, destBytes, 0644)
 		if err != nil {
 			log.WithFields(log.Fields{"file": r.Destination, "error": err}).Error("Failed writing file.")
 			return

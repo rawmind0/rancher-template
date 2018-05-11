@@ -165,16 +165,16 @@ func (m *rancherMetadata) writeTemplates() {
 }
 
 func (m *rancherMetadata) addRunner() chan struct{} {
-	chan_new := make(chan struct{}, 1)
-	m.Runners = append(m.Runners, chan_new)
+	chanNew := make(chan struct{}, 1)
+	m.Runners = append(m.Runners, chanNew)
 
-	return chan_new
+	return chanNew
 }
 
 func (m *rancherMetadata) closeRunners() {
-	for _, r_chan := range m.Runners {
-		if r_chan != nil {
-			r_chan <- struct{}{}
+	for _, rChan := range m.Runners {
+		if rChan != nil {
+			rChan <- struct{}{}
 		}
 	}
 	m.Runners = nil
@@ -232,13 +232,13 @@ func (m *rancherMetadata) run() {
 }
 
 func (m *rancherMetadata) init() {
-	log_file, err := os.OpenFile(m.Logfile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	logFile, err := os.OpenFile(m.Logfile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		log.WithFields(log.Fields{"file": m.Logfile, "error": err}).Fatal("Failed opening log file.")
 	}
-	defer log_file.Close()
+	defer logFile.Close()
 
-	multi := io.MultiWriter(log_file, os.Stdout)
+	multi := io.MultiWriter(logFile, os.Stdout)
 
 	log.SetOutput(multi)
 
